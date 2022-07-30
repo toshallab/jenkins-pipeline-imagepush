@@ -38,7 +38,7 @@ pipeline {
     stage('Pushing to ECR') {
      steps{  
          script {
-                sh "docker tag ${jenkins-pipeline-imagepush}:${latest-ecrimage} ${https://github.com/toshallab/jenkins-pipeline-imagepush.git}:$latest-ecrimage"
+                sh "docker tag ${jenkins-pipeline-imagepush}:${latest-ecrimage} ${696686959144}.dkr.ecr.${us-east-1}.amazonaws.com/${jenkins-pipeline-imagepush}:$latest-ecrimage"
                 sh "docker push ${696686959144}.dkr.ecr.${us-east-1}.amazonaws.com/${jenkins-pipeline-imagepush}:${latest-ecrimage}"
          }
         }
