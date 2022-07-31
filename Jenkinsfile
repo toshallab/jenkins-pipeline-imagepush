@@ -4,8 +4,8 @@ pipeline {
         AWS_ACCOUNT_ID="696686959144"
         AWS_DEFAULT_REGION="us-east-1" 
         IMAGE_REPO_NAME="jenkins-pipeline-imagepush"
-        IMAGE_TAG="latest-ecrimage"
-        REPOSITORY_URI = "${696686959144}.dkr.ecr.${us-east-1}.amazonaws.com/${jenkins-pipeline-imagepush}"
+        IMAGE_TAG="latest"
+        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
     }
    
     stages {
@@ -13,7 +13,7 @@ pipeline {
          stage('Logging into AWS ECR') {
             steps {
                 script {
-                sh "aws ecr get-login-password --region ${us-east-1} | docker login --username AWS --password-stdin ${696686959144}.dkr.ecr.${us-east-1}.amazonaws.com"
+                sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
                 }
                  
             }
@@ -21,7 +21,7 @@ pipeline {
         
         stage('Cloning Git') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/toshallab/jenkins-pipeline-imagepush.git']]])     
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: '8c92069a-819e-41cc-bb69-0638f49512a6', url: 'https://github.com/toshallab/jenkins-pipeline-imagepush.git']]])     
             }
         }
   
@@ -29,7 +29,7 @@ pipeline {
     stage('Building image') {
       steps{
         script {
-          dockerImage = docker.build "${jenkins-pipeline-imagepush}:${latest-ecrimage}"
+          dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
         }
       }
     }
@@ -38,8 +38,8 @@ pipeline {
     stage('Pushing to ECR') {
      steps{  
          script {
-                sh "docker tag ${jenkins-pipeline-imagepush}:${latest-ecrimage} ${696686959144}.dkr.ecr.${us-east-1}.amazonaws.com/${jenkins-pipeline-imagepush}:$latest-ecrimage"
-                sh "docker push ${696686959144}.dkr.ecr.${us-east-1}.amazonaws.com/${jenkins-pipeline-imagepush}:${latest-ecrimage}"
+                sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:$IMAGE_TAG"
+                sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"
          }
         }
       }
